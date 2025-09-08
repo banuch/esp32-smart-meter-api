@@ -1,0 +1,1 @@
+{"success":true,"data":{"reading_interval":300,"batch_size":100,"transmission_interval":900,"voltage_threshold":{"min":207,"max":253},"current_threshold":{"max":100},"emergency_thresholds":{"voltage_critical":{"min":184,"max":276},"power_outage_timeout":60},"heartbeat_interval":300,"reconnect_delay":30,"max_retries":3},"meter_id":"18","timestamp":"2025-09-08T08:23:45.497Z"}

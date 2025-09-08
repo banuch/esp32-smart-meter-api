@@ -1,0 +1,4 @@
+{
+    "error": "Meter number already exists",
+    "code": "DUPLICATE_METER"
+}

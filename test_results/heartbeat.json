@@ -1,0 +1,11 @@
+{
+    "success": true,
+    "message": "Heartbeat received",
+    "server_time": "2025-09-08T08:20:45.879Z",
+    "next_heartbeat": "2025-09-08T08:25:45.879Z",
+    "instructions": {
+        "reading_interval": 300,
+        "batch_size": 100,
+        "emergency_contact": "support@smartmeter.com"
+    }
+}

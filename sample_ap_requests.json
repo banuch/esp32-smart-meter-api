@@ -1,0 +1,69 @@
+curl -X POST http://localhost:3000/api/v1/meter/18/reading \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: ESP32_18_1757319009493_1b2aad987f9460d3" \
+  -d '{
+    "reading_datetime": "2025-09-08T10:35:00Z",
+    "r_phase_current": 12.5,
+    "y_phase_current": 11.8,
+    "b_phase_current": 13.2,
+    "r_phase_voltage": 230.5,
+    "y_phase_voltage": 229.8,
+    "b_phase_voltage": 231.2,
+    "kw_import": 8.5,
+    "kw_export": 0.0,
+    "kva_import": 9.2,
+    "kva_export": 0.0,
+    "kwh_import": 12450.5,
+    "kwh_export": 125.2,
+    "kvah_import": 13200.8,
+    "kvah_export": 145.5
+  }'
+
+
+
+  curl -X POST http://localhost:3000/api/v1/meter/18/tod-readings \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: ESP32_18_1757319009493_1b2aad987f9460d3" \
+  -d '{
+    "tod_readings": [
+      {
+        "tod_period": 1,
+        "reading_datetime": "2025-09-08T10:30:00Z",
+        "kwh_import": 1250.5,
+        "kwh_export": 15.2,
+        "kvah_import": 1320.8,
+        "kvah_export": 18.5
+      },
+      {
+        "tod_period": 2,
+        "reading_datetime": "2025-09-08T10:30:00Z",
+        "kwh_import": 2100.3,
+        "kwh_export": 25.8,
+        "kvah_import": 2250.4,
+        "kvah_export": 28.2
+      }
+    ]
+  }'
+
+
+
+
+  curl -X POST http://localhost:3000/api/v1/meter/18/heartbeat \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: ESP32_18_1757319009493_1b2aad987f9460d3" \
+  -d '{
+    "firmware_version": "1.2.3",
+    "battery_level": 85,
+    "signal_strength": -45,
+    "uptime": 3600,
+    "free_heap": 45000,
+    "wifi_rssi": -55,
+    "temperature": 35.5,
+    "error_count": 0,
+    "last_restart_reason": "POWER_ON"
+  }'
+
+
+
+  curl -X GET http://localhost:3000/api/v1/meter/1 \
+  -H "X-API-Key: ESP32_1_1725788400000_a1b2c3d4e5f6g7h8"

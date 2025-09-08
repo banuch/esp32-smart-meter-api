@@ -1,0 +1,1 @@
+{"success":true,"data":{"id":18,"meter_make":"Schneider Electric","meter_no":"SE001234567","g32":"G32_CONFIG_A","mf":"1.0000","location":"Building A - Floor 1 - Room 101","status":"ACTIVE","firmware_version":"1.2.3","battery_level":85,"wifi_rssi":-55,"last_seen":"2025-09-08T13:53:45.000Z","created_at":"2025-09-08T13:40:09.000Z"}}

@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Meter API Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a'
+                        },
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        },
+                        accent: {
+                            purple: '#8b5cf6',
+                            pink: '#ec4899',
+                            green: '#10b981',
+                            yellow: '#f59e0b',
+                            orange: '#f97316',
+                            red: '#ef4444'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    },
+                    backdropBlur: {
+                        'xs': '2px'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .pulse-ring {
+            animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.33);
+            }
+            40%, 50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.2);
+            }
+        }
+
+        .scrollbar-hidden::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hidden {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-dark sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-3">
+                            <i class="fas fa-bolt text-white text-lg"></i>
+                        </div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            Smart Meter Dashboard
+                        </h1>
+                    </div>
+                    <div class="hidden md:ml-8 md:flex md:space-x-1">
+                        <button class="nav-btn bg-white/20 text-blue-600 border border-blue-200 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/30"
+                            data-tab="overview">
+                            <i class="fas fa-home mr-2"></i>Overview
+                        </button>
+                        <button class="nav-btn text-gray-600 hover:text-blue-600 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                            data-tab="register">
+                            <i class="fas fa-plus-circle mr-2"></i>Register
+                        </button>
+                        <button class="nav-btn text-gray-600 hover:text-blue-600 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                            data-tab="meters">
+                            <i class="fas fa-list mr-2"></i>Meters
+                        </button>
+                        <button class="nav-btn text-gray-600 hover:text-blue-600 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                            data-tab="api-test">
+                            <i class="fas fa-code mr-2"></i>API Test
+                        </button>
+                        <button class="nav-btn text-gray-600 hover:text-blue-600 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                            data-tab="logs">
+                            <i class="fas fa-terminal mr-2"></i>Logs
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="connectionStatus" class="flex items-center space-x-2">
+                        <div class="relative">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <div class="absolute inset-0 w-3 h-3 bg-green-500 rounded-full pulse-ring"></div>
+                        </div>
+                        <span class="text-sm text-gray-600 font-medium">Connected</span>
+                    </div>
+                    <button id="loginBtn"
+                        class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div class="md:hidden px-4 pb-3">
+            <div class="flex flex-wrap gap-2">
+                <button class="nav-btn bg-white/20 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg text-xs font-medium"
+                    data-tab="overview">Overview</button>
+                <button class="nav-btn text-gray-600 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-medium"
+                    data-tab="register">Register</button>
+                <button class="nav-btn text-gray-600 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-medium"
+                    data-tab="meters">Meters</button>
+                <button class="nav-btn text-gray-600 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-medium"
+                    data-tab="api-test">API</button>
+                <button class="nav-btn text-gray-600 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-medium"
+                    data-tab="logs">Logs</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content animate-fade-in">
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Active Meters Card -->
+                <div class="gradient-card rounded-2xl p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 mb-1">Active Meters</p>
+                            <p id="activeMeterCount" class="text-3xl font-bold text-gray-900">-</p>
+                            <p class="text-xs text-green-600 mt-1">
+                                <i class="fas fa-arrow-up mr-1"></i>12% from last week
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-bolt text-white text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Readings Card -->
+                <div class="gradient-card rounded-2xl p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 mb-1">Total Readings</p>
+                            <p id="totalReadings" class="text-3xl font-bold text-gray-900">-</p>
+                            <p class="text-xs text-green-600 mt-1">
+                                <i class="fas fa-arrow-up mr-1"></i>8% from last week
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-green-600 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-chart-line text-white text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts Card -->
+                <div class="gradient-card rounded-2xl p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 mb-1">Active Alerts</p>
+                            <p id="alertCount" class="text-3xl font-bold text-gray-900">0</p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-check mr-1"></i>All systems normal
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-white text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Health Card -->
+                <div class="gradient-card rounded-2xl p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 mb-1">API Health</p>
+                            <p id="apiHealth" class="text-3xl font-bold text-green-600">Healthy</p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-clock mr-1"></i>Response: 45ms
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-heartbeat text-white text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status and Recent Activity -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- System Status -->
+                <div class="gradient-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-server text-blue-500 mr-3"></i>System Status
+                    </h3>
+                    <div id="systemStatus" class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <div class="flex items-center">
+                                <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                                <span class="text-sm font-medium text-gray-700">API Server</span>
+                            </div>
+                            <span class="px-3 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Online</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <div class="flex items-center">
+                                <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                                <span class="text-sm font-medium text-gray-700">Database</span>
+                            </div>
+                            <span class="px-3 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Connected</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <div class="flex items-center">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                                <span class="text-sm font-medium text-gray-700">Last Update</span>
+                            </div>
+                            <span class="text-sm text-gray-600" id="lastUpdate">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="gradient-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-rocket text-purple-500 mr-3"></i>Quick Actions
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="showTab('register')" 
+                            class="p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 card-hover">
+                            <i class="fas fa-plus-circle text-lg mb-2"></i>
+                            <p class="text-sm font-medium">Add Meter</p>
+                        </button>
+                        <button onclick="showTab('api-test')" 
+                            class="p-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 card-hover">
+                            <i class="fas fa-code text-lg mb-2"></i>
+                            <p class="text-sm font-medium">Test API</p>
+                        </button>
+                        <button onclick="refreshMeters()" 
+                            class="p-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 card-hover">
+                            <i class="fas fa-sync-alt text-lg mb-2"></i>
+                            <p class="text-sm font-medium">Refresh</p>
+                        </button>
+                        <button onclick="exportLogs()" 
+                            class="p-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 card-hover">
+                            <i class="fas fa-download text-lg mb-2"></i>
+                            <p class="text-sm font-medium">Export</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Meter Tab -->
+        <div id="register" class="tab-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="gradient-card rounded-2xl p-6 lg:p-8 animate-fade-in">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-plus-circle text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Register New Meter</h3>
+                        <p class="text-gray-600">Add a new smart meter to your monitoring system</p>
+                    </div>
+
+                    <form id="registerMeterForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label for="meter_make" class="block text-sm font-semibold text-gray-700">
+                                    <i class="fas fa-industry text-blue-500 mr-2"></i>Meter Make
+                                </label>
+                                <input type="text" id="meter_make" name="meter_make" required
+                                    class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    placeholder="e.g., Schneider Electric">
+                                <p class="text-xs text-gray-500">Manufacturer of the meter</p>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="meter_no" class="block text-sm font-semibold text-gray-700">
+                                    <i class="fas fa-hashtag text-green-500 mr-2"></i>Meter Number
+                                </label>
+                                <input type="text" id="meter_no" name="meter_no" required
+                                    class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    placeholder="SMT-2024-001">
+                                <p class="text-xs text-gray-500">Unique identifier for the meter</p>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="g32" class="block text-sm font-semibold text-gray-700">
+                                    <i class="fas fa-cog text-purple-500 mr-2"></i>G32 Configuration
+                                </label>
+                                <select id="g32" name="g32"
+                                    class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                                    <option value="G32_CONFIG_A">G32 Config A</option>
+                                    <option value="G32_CONFIG_B">G32 Config B</option>
+                                    <option value="G32_CONFIG_C">G32 Config C</option>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="mf" class="block text-sm font-semibold text-gray-700">
+                                    <i class="fas fa-calculator text-orange-500 mr-2"></i>Multiplication Factor
+                                </label>
+                                <input type="number" id="mf" name="mf" step="0.1" value="1.0" required
+                                    class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="location" class="block text-sm font-semibold text-gray-700">
+                                <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>Location
+                            </label>
+                            <textarea id="location" name="location" rows="3" required
+                                class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                placeholder="Building A, Floor 2, Room 201..."></textarea>
+                            <p class="text-xs text-gray-500">Physical location or address of the meter</p>
+                        </div>
+                        <div class="flex justify-end pt-4">
+                            <button type="submit"
+                                class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+                                <i class="fas fa-plus mr-2"></i>Register Meter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Registration Result -->
+                <div id="registrationResult" class="hidden mt-6 animate-slide-up">
+                    <div class="gradient-card rounded-2xl p-6 lg:p-8">
+                        <div class="text-center mb-6">
+                            <div class="w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-check text-white text-2xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h3>
+                            <p class="text-gray-600">Your meter has been registered successfully</p>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-2xl p-6 mb-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="flex justify-between items-center p-3 bg-white rounded-xl">
+                                    <span class="text-sm font-semibold text-gray-700">Meter ID:</span>
+                                    <span id="resultMeterId" class="text-sm font-mono text-gray-900"></span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-white rounded-xl">
+                                    <span class="text-sm font-semibold text-gray-700">Meter Number:</span>
+                                    <span id="resultMeterNo" class="text-sm font-mono text-gray-900"></span>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-semibold text-gray-700">API Key:</label>
+                                <div class="flex">
+                                    <input type="text" id="resultApiKey" readonly
+                                        class="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-l-xl font-mono text-sm">
+                                    <button type="button" onclick="copyApiKey()"
+                                        class="bg-blue-500 hover:bg-blue-600 border border-blue-500 text-white px-6 py-3 rounded-r-xl font-medium transition-all duration-200">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+                            <h4 class="text-lg font-semibold text-blue-900 mb-4 flex items-center">
+                                <i class="fas fa-lightbulb mr-2"></i>Next Steps
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">1</div>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-900">Configure Device</p>
+                                        <p class="text-xs text-blue-700">Copy the API key to your ESP32</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">2</div>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-900">Test Connection</p>
+                                        <p class="text-xs text-blue-700">Use the API Testing tab</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">3</div>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-900">Start Monitoring</p>
+                                        <p class="text-xs text-blue-700">Begin sending readings</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meters Tab -->
+        <div id="meters" class="tab-content hidden">
+            <div class="gradient-card rounded-2xl overflow-hidden animate-fade-in">
+                <div class="p-6 border-b border-gray-200/50">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900 flex items-center">
+                                <i class="fas fa-list text-blue-500 mr-3"></i>Registered Meters
+                            </h3>
+                            <p class="text-gray-600 mt-1">Manage and monitor your smart meters</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                            <input type="text" id="meterSearch" placeholder="Search meters..."
+                                class="px-4 py-2 bg-white/70 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                            <select id="statusFilter"
+                                class="px-4 py-2 bg-white/70 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                <option value="">All Status</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="INACTIVE">Inactive</option>
+                                <option value="MAINTENANCE">Maintenance</option>
+                            </select>
+                            <button onclick="refreshMeters()"
+                                class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+                                <i class="fas fa-sync-alt mr-2"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto scrollbar-hidden">
+                    <table class="min-w-full">
+                        <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                    <i class="fas fa-bolt mr-2"></i>Meter Info
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>Location
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                    <i class="fas fa-toggle-on mr-2"></i>Status
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                    <i class="fas fa-clock mr-2"></i>Last Seen
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                    <i class="fas fa-wifi mr-2"></i>Signal
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                    <i class="fas fa-cogs mr-2"></i>Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="metersTableBody" class="divide-y divide-gray-200/50">
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center">
+                                    <div class="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                                    <p class="text-gray-500">Loading meters...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Testing Tab -->
+        <div id="api-test" class="tab-content hidden">
+            <div class="space-y-6 animate-fade-in">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-code text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">API Testing Center</h3>
+                    <p class="text-gray-600">Test and debug your Smart Meter API endpoints</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- API Configuration -->
+                    <div class="gradient-card rounded-2xl p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                            <i class="fas fa-cog text-blue-500 mr-3"></i>Configuration
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-link text-blue-500 mr-2"></i>Base URL
+                                </label>
+                                <input type="text" id="apiBaseUrl" value="http://localhost:3000/api/v1"
+                                    class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                    <i class="fas fa-shield-alt text-green-500 mr-2"></i>Authentication
+                                </label>
+                                <div class="space-y-3">
+                                    <div class="flex items-center p-3 bg-white/50 rounded-xl">
+                                        <input type="radio" id="authTypeApi" name="authType" value="api" checked
+                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                        <label for="authTypeApi" class="ml-3 text-sm font-medium text-gray-700 flex items-center">
+                                            <i class="fas fa-key text-orange-500 mr-2"></i>API Key
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center p-3 bg-white/50 rounded-xl">
+                                        <input type="radio" id="authTypeJwt" name="authType" value="jwt"
+                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                        <label for="authTypeJwt" class="ml-3 text-sm font-medium text-gray-700 flex items-center">
+                                            <i class="fas fa-user-shield text-purple-500 mr-2"></i>JWT Token
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="apiKeyInput">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">API Key</label>
+                                <input type="text" id="testApiKey" placeholder="Enter API key..."
+                                    class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-mono text-sm">
+                            </div>
+                            <div id="jwtTokenInput" class="hidden">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">JWT Token</label>
+                                <input type="text" id="testJwtToken" placeholder="Enter JWT token..."
+                                    class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-mono text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Tests -->
+                    <div class="gradient-card rounded-2xl p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                            <i class="fas fa-rocket text-purple-500 mr-3"></i>Quick Tests
+                        </h3>
+                        <div class="grid grid-cols-1 gap-3">
+                            <button onclick="testHealth()"
+                                class="group p-4 bg-white/50 hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 hover:text-white border border-gray-200 hover:border-blue-500 rounded-xl transition-all duration-200 text-left">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-semibold group-hover:text-white">Health Check</div>
+                                        <div class="text-sm text-gray-500 group-hover:text-blue-100">GET /health</div>
+                                    </div>
+                                    <i class="fas fa-heartbeat text-red-500 group-hover:text-white"></i>
+                                </div>
+                            </button>
+                            <button onclick="testDeviceInfo()"
+                                class="group p-4 bg-white/50 hover:bg-gradient-to-r hover:from-green-500 hover:to-green-600 hover:text-white border border-gray-200 hover:border-green-500 rounded-xl transition-all duration-200 text-left">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-semibold group-hover:text-white">Device Info</div>
+                                        <div class="text-sm text-gray-500 group-hover:text-green-100">GET /meter/{id}</div>
+                                    </div>
+                                    <i class="fas fa-info-circle text-blue-500 group-hover:text-white"></i>
+                                </div>
+                            </button>
+                            <button onclick="testLatestReadings()"
+                                class="group p-4 bg-white/50 hover:bg-gradient-to-r hover:from-purple-500 hover:to-purple-600 hover:text-white border border-gray-200 hover:border-purple-500 rounded-xl transition-all duration-200 text-left">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-semibold group-hover:text-white">Latest Readings</div>
+                                        <div class="text-sm text-gray-500 group-hover:text-purple-100">GET /meter/{id}/readings/latest</div>
+                                    </div>
+                                    <i class="fas fa-chart-line text-green-500 group-hover:text-white"></i>
+                                </div>
+                            </button>
+                            <button onclick="testSubmitReading()"
+                                class="group p-4 bg-white/50 hover:bg-gradient-to-r hover:from-orange-500 hover:to-orange-600 hover:text-white border border-gray-200 hover:border-orange-500 rounded-xl transition-all duration-200 text-left">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-semibold group-hover:text-white">Submit Reading</div>
+                                        <div class="text-sm text-gray-500 group-hover:text-orange-100">POST /meter/{id}/reading</div>
+                                    </div>
+                                    <i class="fas fa-upload text-purple-500 group-hover:text-white"></i>
+                                </div>
+                            </button>
+                            <button onclick="testHeartbeat()"
+                                class="group p-4 bg-white/50 hover:bg-gradient-to-r hover:from-pink-500 hover:to-pink-600 hover:text-white border border-gray-200 hover:border-pink-500 rounded-xl transition-all duration-200 text-left">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-semibold group-hover:text-white">Heartbeat</div>
+                                        <div class="text-sm text-gray-500 group-hover:text-pink-100">POST /meter/{id}/heartbeat</div>
+                                    </div>
+                                    <i class="fas fa-heartbeat text-red-500 group-hover:text-white"></i>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom API Test -->
+                <div class="gradient-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-terminal text-green-500 mr-3"></i>Custom API Test
+                    </h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Method</label>
+                                    <select id="customMethod"
+                                        class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                                        <option value="GET" class="bg-green-100">GET</option>
+                                        <option value="POST" class="bg-blue-100">POST</option>
+                                        <option value="PUT" class="bg-yellow-100">PUT</option>
+                                        <option value="DELETE" class="bg-red-100">DELETE</option>
+                                    </select>
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Endpoint</label>
+                                    <input type="text" id="customEndpoint" placeholder="/meter/1/reading"
+                                        class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-mono">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Request Body (JSON)</label>
+                                <textarea id="customBody" rows="10" placeholder='{"key": "value"}'
+                                    class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-mono text-sm"></textarea>
+                            </div>
+                            <button onclick="executeCustomTest()"
+                                class="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+                                <i class="fas fa-play mr-2"></i>Execute Test
+                            </button>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Response</label>
+                            <div id="customResponse"
+                                class="bg-gray-900 text-green-400 border border-gray-700 rounded-xl p-4 min-h-[300px] max-h-[400px] overflow-auto scrollbar-hidden">
+                                <pre class="text-sm"><code>Response will appear here...</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Tab -->
+        <div id="logs" class="tab-content hidden">
+            <div class="gradient-card rounded-2xl p-6 animate-fade-in">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900 flex items-center">
+                            <i class="fas fa-terminal text-green-500 mr-3"></i>API Logs
+                        </h3>
+                        <p class="text-gray-600 mt-1">Monitor API requests and responses in real-time</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="clearLogs()"
+                            class="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+                            <i class="fas fa-trash mr-2"></i>Clear
+                        </button>
+                        <button onclick="exportLogs()"
+                            class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2 rounded-lg font-medium hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+                            <i class="fas fa-download mr-2"></i>Export
+                        </button>
+                    </div>
+                </div>
+                <div id="logsContainer"
+                    class="bg-gray-900 text-green-400 p-6 rounded-2xl font-mono text-sm h-96 overflow-y-auto scrollbar-hidden border border-gray-700 shadow-inner">
+                    <div class="text-gray-500 flex items-center">
+                        <i class="fas fa-terminal mr-2"></i>
+                        <span>Logs will appear here...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="gradient-card rounded-2xl max-w-md w-full p-6 animate-slide-up">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-shield text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Admin Login</h3>
+                <p class="text-gray-600">Enter your credentials to access admin features</p>
+            </div>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-user text-blue-500 mr-2"></i>Username
+                    </label>
+                    <input type="text" id="loginUsername" required
+                        class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-lock text-purple-500 mr-2"></i>Password
+                    </label>
+                    <input type="password" id="loginPassword" required
+                        class="w-full px-4 py-3 bg-white/70 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                    <button type="submit"
+                        class="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                    <button type="button" onclick="closeLoginModal()"
+                        class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all duration-200">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <script>
+        // Global variables
+        let currentToken = localStorage.getItem('adminToken');
+        let apiLogs = [];
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeTabs();
+            checkHealth();
+            updateLoginButton();
+            loadOverviewData();
+
+            // Set up form listeners
+            document.getElementById('registerMeterForm').addEventListener('submit', handleMeterRegistration);
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+
+            // Set up auth type change
+            document.querySelectorAll('input[name="authType"]').forEach(radio => {
+                radio.addEventListener('change', toggleAuthInput);
+            });
+
+            // Auto-refresh data every 30 seconds
+            setInterval(() => {
+                if (!document.getElementById('overview').classList.contains('hidden')) {
+                    loadOverviewData();
+                }
+                if (!document.getElementById('meters').classList.contains('hidden')) {
+                    loadMeters();
+                }
+            }, 30000);
+        });
+
+        // Tab management
+        function initializeTabs() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const tabName = this.getAttribute('data-tab');
+                    showTab(tabName);
+
+                    // Update active tab styling
+                    document.querySelectorAll('.nav-btn').forEach(b => {
+                        b.className = 'nav-btn text-gray-600 hover:text-blue-600 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200';
+                    });
+                    this.className = 'nav-btn bg-white/20 text-blue-600 border border-blue-200 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/30';
+                });
+            });
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.remove('hidden');
+
+            // Load tab-specific data
+            switch (tabName) {
+                case 'overview':
+                    loadOverviewData();
+                    break;
+                case 'meters':
+                    loadMeters();
+                    break;
+            }
+        }
+
+        // Authentication
+        function toggleAuthInput() {
+            const authType = document.querySelector('input[name="authType"]:checked').value;
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const jwtTokenInput = document.getElementById('jwtTokenInput');
+
+            if (authType === 'api') {
+                apiKeyInput.classList.remove('hidden');
+                jwtTokenInput.classList.add('hidden');
+            } else {
+                apiKeyInput.classList.add('hidden');
+                jwtTokenInput.classList.remove('hidden');
+            }
+        }
+
+        function updateLoginButton() {
+            const loginBtn = document.getElementById('loginBtn');
+            if (currentToken) {
+                loginBtn.innerHTML = '<i class="fas fa-sign-out-alt mr-2"></i>Logout';
+                loginBtn.onclick = logout;
+            } else {
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Login';
+                loginBtn.onclick = openLoginModal;
+            }
+        }
+
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        currentToken = data.token;
+                        localStorage.setItem('adminToken', currentToken);
+                        updateLoginButton();
+                        closeLoginModal();
+                        showNotification('Login successful!', 'success');
+                        loadOverviewData();
+                    } else {
+                        showNotification('Login failed: ' + data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Login error:', error);
+                    showNotification('Login failed: Network error', 'error');
+                });
+        }
+
+        function logout() {
+            currentToken = null;
+            localStorage.removeItem('adminToken');
+            updateLoginButton();
+            showNotification('Logged out successfully', 'success');
+        }
+
+        // Meter registration
+        function handleMeterRegistration(e) {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const meterData = {
+                meter_make: formData.get('meter_make'),
+                meter_no: formData.get('meter_no'),
+                g32: formData.get('g32'),
+                mf: parseFloat(formData.get('mf')),
+                location: formData.get('location')
+            };
+
+            logApiCall('POST', '/api/v1/auth/register-device', meterData);
+
+            fetch('/api/v1/auth/register-device', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(meterData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    logApiResponse('POST', '/api/v1/auth/register-device', data);
+
+                    if (data.success) {
+                        // Show registration result
+                        document.getElementById('resultMeterId').textContent = data.data.meter_id;
+                        document.getElementById('resultMeterNo').textContent = data.data.meter_no;
+                        document.getElementById('resultApiKey').value = data.data.api_key;
+                        document.getElementById('registrationResult').classList.remove('hidden');
+
+                        // Reset form
+                        e.target.reset();
+
+                        showNotification('Meter registered successfully!', 'success');
+                    } else {
+                        showNotification('Registration failed: ' + data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Registration error:', error);
+                    logApiResponse('POST', '/api/v1/auth/register-device', { error: error.message });
+                    showNotification('Registration failed: Network error', 'error');
+                });
+        }
+
+        function copyApiKey() {
+            const apiKeyField = document.getElementById('resultApiKey');
+            apiKeyField.select();
+            document.execCommand('copy');
+            showNotification('API key copied to clipboard!', 'success');
+        }
+
+        // Data loading functions
+        function checkHealth() {
+            fetch('/health')
+                .then(response => response.json())
+                .then(data => {
+                    const healthElement = document.getElementById('apiHealth');
+                    const statusElement = document.getElementById('connectionStatus');
+
+                    if (data.status === 'healthy') {
+                        healthElement.textContent = 'Healthy';
+                        healthElement.className = 'text-3xl font-bold text-green-600';
+                        statusElement.innerHTML = '<div class="relative"><div class="w-3 h-3 bg-green-500 rounded-full"></div><div class="absolute inset-0 w-3 h-3 bg-green-500 rounded-full pulse-ring"></div></div><span class="text-sm text-gray-600 font-medium">Connected</span>';
+                    } else {
+                        healthElement.textContent = 'Unhealthy';
+                        healthElement.className = 'text-3xl font-bold text-red-600';
+                        statusElement.innerHTML = '<div class="w-3 h-3 bg-red-500 rounded-full"></div><span class="text-sm text-gray-600 font-medium">Disconnected</span>';
+                    }
+
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                })
+                .catch(error => {
+                    console.error('Health check failed:', error);
+                    const healthElement = document.getElementById('apiHealth');
+                    const statusElement = document.getElementById('connectionStatus');
+
+                    healthElement.textContent = 'Error';
+                    healthElement.className = 'text-3xl font-bold text-red-600';
+                    statusElement.innerHTML = '<div class="w-3 h-3 bg-red-500 rounded-full"></div><span class="text-sm text-gray-600 font-medium">Error</span>';
+                });
+        }
+
+        function loadOverviewData() {
+            // Only load if we have admin token
+            if (!currentToken) {
+                return;
+            }
+
+            fetch('/api/v1/meters', {
+                headers: {
+                    'Authorization': `Bearer ${currentToken}`
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const activeCount = data.data.filter(meter => meter.status === 'ACTIVE').length;
+                        document.getElementById('activeMeterCount').textContent = activeCount;
+
+                        // Calculate total readings (mock data for now)
+                        document.getElementById('totalReadings').textContent = (activeCount * 144).toLocaleString();
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load overview data:', error);
+                });
+        }
+
+        function loadMeters() {
+            if (!currentToken) {
+                document.getElementById('metersTableBody').innerHTML =
+                    '<tr><td colspan="6" class="px-6 py-12 text-center"><div class="text-yellow-500 mb-2"><i class="fas fa-lock text-2xl"></i></div><p class="text-gray-500">Please login to view meters</p></td></tr>';
+                return;
+            }
+
+            const search = document.getElementById('meterSearch')?.value || '';
+            const status = document.getElementById('statusFilter')?.value || '';
+
+            let url = '/api/v1/meters?';
+            if (search) url += `search=${encodeURIComponent(search)}&`;
+            if (status) url += `status=${status}&`;
+
+            fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${currentToken}`
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderMetersTable(data.data);
+                    } else {
+                        document.getElementById('metersTableBody').innerHTML =
+                            '<tr><td colspan="6" class="px-6 py-12 text-center"><div class="text-red-500 mb-2"><i class="fas fa-exclamation-triangle text-2xl"></i></div><p class="text-gray-500">Failed to load meters</p></td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load meters:', error);
+                    document.getElementById('metersTableBody').innerHTML =
+                        '<tr><td colspan="6" class="px-6 py-12 text-center"><div class="text-red-500 mb-2"><i class="fas fa-wifi text-2xl"></i></div><p class="text-gray-500">Error loading meters</p></td></tr>';
+                });
+        }
+
+        function renderMetersTable(meters) {
+            const tbody = document.getElementById('metersTableBody');
+
+            if (meters.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center"><div class="text-gray-400 mb-2"><i class="fas fa-search text-2xl"></i></div><p class="text-gray-500">No meters found</p></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = meters.map(meter => {
+                const statusColors = {
+                    'ACTIVE': 'bg-green-100 text-green-800 border-green-200',
+                    'INACTIVE': 'bg-red-100 text-red-800 border-red-200',
+                    'MAINTENANCE': 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                };
+
+                const statusIcons = {
+                    'ACTIVE': 'fas fa-check-circle text-green-500',
+                    'INACTIVE': 'fas fa-times-circle text-red-500',
+                    'MAINTENANCE': 'fas fa-wrench text-yellow-500'
+                };
+
+                const lastSeen = meter.last_seen ? new Date(meter.last_seen).toLocaleString() : 'Never';
+                const signalStrength = meter.wifi_rssi ? `${meter.wifi_rssi} dBm` : 'N/A';
+                const signalColor = meter.wifi_rssi > -50 ? 'text-green-600' : meter.wifi_rssi > -70 ? 'text-yellow-600' : 'text-red-600';
+
+                return `
+                    <tr class="hover:bg-white/50 transition-all duration-200">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-bolt text-white"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-semibold text-gray-900">${meter.meter_no}</div>
+                                    <div class="text-sm text-gray-500">${meter.meter_make}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900 max-w-xs truncate" title="${meter.location}">
+                                <i class="fas fa-map-marker-alt text-gray-400 mr-2"></i>${meter.location}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${statusColors[meter.status] || 'bg-gray-100 text-gray-800 border-gray-200'}">
+                                <i class="${statusIcons[meter.status] || 'fas fa-question-circle text-gray-500'} mr-1"></i>
+                                ${meter.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">${lastSeen}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-wifi ${signalColor}"></i>
+                                <span class="text-sm ${signalColor}">${signalStrength}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex space-x-2">
+                                <button onclick="viewMeterDetails(${meter.id})" 
+                                    class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200">
+                                    <i class="fas fa-eye mr-1"></i>View
+                                </button>
+                                <button onclick="testMeter(${meter.id})" 
+                                    class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200">
+                                    <i class="fas fa-play mr-1"></i>Test
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function refreshMeters() {
+            loadMeters();
+            showNotification('Meters refreshed successfully', 'success');
+        }
+
+        function viewMeterDetails(meterId) {
+            // Switch to API test tab and set up meter details test
+            showTab('api-test');
+            document.querySelector('[data-tab="api-test"]').click();
+
+            // Set up the test
+            document.getElementById('customMethod').value = 'GET';
+            document.getElementById('customEndpoint').value = `/meter/${meterId}`;
+            document.getElementById('customBody').value = '';
+        }
+
+        function testMeter(meterId) {
+            // Switch to API test tab and set up heartbeat test
+            showTab('api-test');
+            document.querySelector('[data-tab="api-test"]').click();
+
+            // Set up the test
+            document.getElementById('customMethod').value = 'POST';
+            document.getElementById('customEndpoint').value = `/meter/${meterId}/heartbeat`;
+            document.getElementById('customBody').value = JSON.stringify({
+                firmware_version: "1.0.0",
+                battery_level: 85,
+                signal_strength: -45,
+                uptime: 3600,
+                free_heap: 200000,
+                wifi_rssi: -45,
+                temperature: 25.5,
+                error_count: 0
+            }, null, 2);
+        }
+
+        // API Testing functions
+        function getAuthHeaders() {
+            const authType = document.querySelector('input[name="authType"]:checked').value;
+            const headers = { 'Content-Type': 'application/json' };
+
+            if (authType === 'api') {
+                const apiKey = document.getElementById('testApiKey').value;
+                if (apiKey) headers['X-API-Key'] = apiKey;
+            } else {
+                const token = document.getElementById('testJwtToken').value || currentToken;
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            return headers;
+        }
+
+        function testHealth() {
+            logApiCall('GET', '/health', null);
+
+            fetch('/health')
+                .then(response => response.json())
+                .then(data => {
+                    logApiResponse('GET', '/health', data);
+                    showNotification('Health check completed', 'success');
+                })
+                .catch(error => {
+                    logApiResponse('GET', '/health', { error: error.message });
+                    showNotification('Health check failed', 'error');
+                });
+        }
+
+        function testDeviceInfo() {
+            const meterId = prompt('Enter Meter ID:');
+            if (!meterId) return;
+
+            const baseUrl = document.getElementById('apiBaseUrl').value;
+            const url = `${baseUrl}/meter/${meterId}`;
+
+            logApiCall('GET', url, null);
+
+            fetch(url, {
+                headers: getAuthHeaders()
+            })
+                .then(response => response.json())
+                .then(data => {
+                    logApiResponse('GET', url, data);
+                    showNotification('Device info retrieved', 'success');
+                })
+                .catch(error => {
+                    logApiResponse('GET', url, { error: error.message });
+                    showNotification('Device info failed', 'error');
+                });
+        }
+
+        function testLatestReadings() {
+            const meterId = prompt('Enter Meter ID:');
+            if (!meterId) return;
+
+            const baseUrl = document.getElementById('apiBaseUrl').value;
+            const url = `${baseUrl}/meter/${meterId}/readings/latest`;
+
+            logApiCall('GET', url, null);
+
+            fetch(url, {
+                headers: getAuthHeaders()
+            })
+                .then(response => response.json())
+                .then(data => {
+                    logApiResponse('GET', url, data);
+                    showNotification('Latest readings retrieved', 'success');
+                })
+                .catch(error => {
+                    logApiResponse('GET', url, { error: error.message });
+                    showNotification('Latest readings failed', 'error');
+                });
+        }
+
+        function testSubmitReading() {
+            const meterId = prompt('Enter Meter ID:');
+            if (!meterId) return;
+
+            const baseUrl = document.getElementById('apiBaseUrl').value;
+            const url = `${baseUrl}/meter/${meterId}/reading`;
+
+            const sampleReading = {
+                reading_datetime: new Date().toISOString(),
+                r_phase_current: 10.5,
+                y_phase_current: 11.2,
+                b_phase_current: 9.8,
+                r_phase_voltage: 230.5,
+                y_phase_voltage: 229.8,
+                b_phase_voltage: 231.2,
+                kw_import: 5.5,
+                kw_export: 0.0,
+                kva_import: 6.2,
+                kva_export: 0.0,
+                kwh_import: 1234.5,
+                kwh_export: 0.0,
+                kvah_import: 1345.2,
+                kvah_export: 0.0
+            };
+
+            logApiCall('POST', url, sampleReading);
+
+            fetch(url, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(sampleReading)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    logApiResponse('POST', url, data);
+                    showNotification('Reading submitted successfully', 'success');
+                })
+                .catch(error => {
+                    logApiResponse('POST', url, { error: error.message });
+                    showNotification('Reading submission failed', 'error');
+                });
+        }
+
+        function testHeartbeat() {
+            const meterId = prompt('Enter Meter ID:');
+            if (!meterId) return;
+
+            const baseUrl = document.getElementById('apiBaseUrl').value;
+            const url = `${baseUrl}/meter/${meterId}/heartbeat`;
+
+            const heartbeatData = {
+                firmware_version: "1.0.0",
+                battery_level: 85,
+                signal_strength: -45,
+                uptime: 3600,
+                free_heap: 200000,
+                wifi_rssi: -45,
+                temperature: 25.5,
+                error_count: 0
+            };
+
+            logApiCall('POST', url, heartbeatData);
+
+            fetch(url, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(heartbeatData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    logApiResponse('POST', url, data);
+                    showNotification('Heartbeat sent successfully', 'success');
+                })
+                .catch(error => {
+                    logApiResponse('POST', url, { error: error.message });
+                    showNotification('Heartbeat failed', 'error');
+                });
+        }
+
+        function executeCustomTest() {
+            const method = document.getElementById('customMethod').value;
+            const endpoint = document.getElementById('customEndpoint').value;
+            const bodyText = document.getElementById('customBody').value;
+            const baseUrl = document.getElementById('apiBaseUrl').value;
+
+            if (!endpoint) {
+                showNotification('Please enter an endpoint', 'error');
+                return;
+            }
+
+            const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+            let body = null;
+
+            if (bodyText && ['POST', 'PUT'].includes(method)) {
+                try {
+                    body = JSON.parse(bodyText);
+                } catch (e) {
+                    showNotification('Invalid JSON in request body', 'error');
+                    return;
+                }
+            }
+
+            logApiCall(method, url, body);
+
+            const options = {
+                method,
+                headers: getAuthHeaders()
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            fetch(url, options)
+                .then(response => response.json())
+                .then(data => {
+                    logApiResponse(method, url, data);
+                    document.getElementById('customResponse').innerHTML =
+                        `<pre class="text-sm"><code>${JSON.stringify(data, null, 2)}</code></pre>`;
+                    showNotification('API test completed', 'success');
+                })
+                .catch(error => {
+                    const errorData = { error: error.message };
+                    logApiResponse(method, url, errorData);
+                    document.getElementById('customResponse').innerHTML =
+                        `<pre class="text-sm text-red-400"><code>${JSON.stringify(errorData, null, 2)}</code></pre>`;
+                    showNotification('API test failed', 'error');
+                });
+        }
+
+        // Logging functions
+        function logApiCall(method, url, body) {
+            const timestamp = new Date().toISOString();
+            const log = {
+                timestamp,
+                type: 'REQUEST',
+                method,
+                url,
+                body
+            };
+
+            apiLogs.push(log);
+            updateLogsDisplay();
+        }
+
+        function logApiResponse(method, url, response) {
+            const timestamp = new Date().toISOString();
+            const log = {
+                timestamp,
+                type: 'RESPONSE',
+                method,
+                url,
+                response
+            };
+
+            apiLogs.push(log);
+            updateLogsDisplay();
+        }
+
+        function updateLogsDisplay() {
+            const container = document.getElementById('logsContainer');
+            const logs = apiLogs.slice(-50); // Show last 50 logs
+
+            if (logs.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 flex items-center"><i class="fas fa-terminal mr-2"></i><span>Logs will appear here...</span></div>';
+                return;
+            }
+
+            container.innerHTML = logs.map(log => {
+                const color = log.type === 'REQUEST' ? 'text-blue-400' : 'text-green-400';
+                const icon = log.type === 'REQUEST' ? '→' : '←';
+                const methodColor = {
+                    'GET': 'text-green-400',
+                    'POST': 'text-blue-400',
+                    'PUT': 'text-yellow-400',
+                    'DELETE': 'text-red-400'
+                }[log.method] || 'text-gray-400';
+
+                return `
+                    <div class="mb-3 p-2 bg-gray-800 rounded border-l-4 ${log.type === 'REQUEST' ? 'border-blue-500' : 'border-green-500'}">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="text-gray-500 text-xs">[${log.timestamp.substring(11, 19)}]</span>
+                            <span class="${color}">${icon}</span>
+                            <span class="${methodColor} font-bold">${log.method}</span>
+                            <span class="text-gray-300 text-sm">${log.url}</span>
+                        </div>
+                        ${log.body ? `<div class="ml-4 text-gray-400 text-xs overflow-auto"><pre>${JSON.stringify(log.body, null, 2)}</pre></div>` : ''}
+                        ${log.response ? `<div class="ml-4 text-yellow-300 text-xs overflow-auto"><pre>${JSON.stringify(log.response, null, 2)}</pre></div>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLogs() {
+            apiLogs = [];
+            document.getElementById('logsContainer').innerHTML = '<div class="text-gray-500 flex items-center"><i class="fas fa-terminal mr-2"></i><span>Logs cleared...</span></div>';
+            showNotification('Logs cleared', 'info');
+        }
+
+        function exportLogs() {
+            if (apiLogs.length === 0) {
+                showNotification('No logs to export', 'warning');
+                return;
+            }
+
+            const dataStr = JSON.stringify(apiLogs, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `smart-meter-api-logs-${new Date().toISOString().slice(0, 10)}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showNotification('Logs exported successfully', 'success');
+        }
+
+        // Enhanced notification system
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-gradient-to-r from-green-500 to-green-600 border-green-400',
+                error: 'bg-gradient-to-r from-red-500 to-red-600 border-red-400',
+                warning: 'bg-gradient-to-r from-yellow-500 to-yellow-600 border-yellow-400',
+                info: 'bg-gradient-to-r from-blue-500 to-blue-600 border-blue-400'
+            };
+
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+
+            notification.className = `${colors[type] || colors.info} text-white px-6 py-4 rounded-xl shadow-lg z-50 transition-all duration-300 transform translate-x-full opacity-0 border-l-4 max-w-sm`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <i class="${icons[type] || icons.info}"></i>
+                    <span class="font-medium">${message}</span>
+                </div>
+            `;
+
+            container.appendChild(notification);
+
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full', 'opacity-0');
+            }, 100);
+
+            // Animate out and remove
+            setTimeout(() => {
+                notification.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => {
+                    if (container.contains(notification)) {
+                        container.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        // Add search and filter functionality
+        document.getElementById('meterSearch')?.addEventListener('input', debounce(loadMeters, 500));
+        document.getElementById('statusFilter')?.addEventListener('change', loadMeters);
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+</body>
+
+</html>

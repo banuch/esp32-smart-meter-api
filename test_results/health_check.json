@@ -1,0 +1,28 @@
+{
+    "status": "healthy",
+    "timestamp": "2025-09-08T08:20:42.394Z",
+    "version": "1.0.0",
+    "environment": "development",
+    "uptime": 304,
+    "database": {
+        "status": "connected",
+        "responseTime": "2ms",
+        "serverTime": "2025-09-08T13:50:42.000Z",
+        "pool": {
+            "totalConnections": 0,
+            "freeConnections": 0,
+            "acquiringConnections": 0,
+            "queuedRequests": 0
+        }
+    },
+    "memory": {
+        "used": 15,
+        "total": 17,
+        "unit": "MB"
+    },
+    "system": {
+        "nodeVersion": "v24.7.0",
+        "platform": "win32",
+        "arch": "x64"
+    }
+}

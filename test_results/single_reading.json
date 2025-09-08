@@ -1,0 +1,9 @@
+{
+    "success": true,
+    "message": "Reading submitted successfully",
+    "data": {
+        "reading_id": 28808,
+        "meter_id": "18",
+        "timestamp": "2025-09-08T10:35:00Z"
+    }
+}
